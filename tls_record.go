@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/binary"
+	"encoding/hex"
 	"fmt"
 	"log"
 	"net"
@@ -62,7 +63,8 @@ func main() {
 		Opaque: []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
 	}
 	payloadByte, err := encodeTLSPlaintext(payload)
-	log.Printf("payloadByte: %b", payloadByte)
+	payloadByteHex := hex.EncodeToString(payloadByte)
+	log.Printf("payloadByte: %s", payloadByteHex)
 	if err != nil {
 		fmt.Println("Fail to encode TLSPlaintext", err)
 		return
