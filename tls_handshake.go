@@ -13,16 +13,16 @@ import (
 type HandshakeType uint8
 
 const (
-	HelloRequest       HandshakeType  = iota // 0
-	ClientHello                              // 1
-	ServerHello                              // 2
-	Certificate        = iota + 8            // 11
-	ServerKeyExchange                        // 12
-	CertificateRequest                       // 13
-	ServerHelloDone                          // 14
-	CertificateVerify                        // 15
-	ClientKeyExchange                        // 16
-	Finished           = iota + 8 + 3        // 20
+	helloRequest       HandshakeType  = iota // 0
+	clientHello                              // 1
+	serverHello                              // 2
+	certificate        = iota + 8            // 11
+	serverKeyExchange                        // 12
+	certificateRequest                       // 13
+	serverHelloDone                          // 14
+	certificateVerify                        // 15
+	clientKeyExchange                        // 16
+	finished           = iota + 8 + 3        // 20
 	// 255
 )
 
@@ -38,46 +38,6 @@ type Random struct {
 type SessionId [32]byte
 
 type CipherSuite [2]uint8
-
-const (
-	TLS_NULL_WITH_NULL_NULL             CipherSuite = [2]uint8{0x00, 0x00}
-	TLS_RSA_WITH_NULL_MD5               CipherSuite = [2]uint8{0x00, 0x01}
-	TLS_RSA_WITH_NULL_SHA               CipherSuite = [2]uint8{0x00, 0x02}
-	TLS_RSA_WITH_NULL_SHA256            CipherSuite = [2]uint8{0x00, 0x3B}
-	TLS_RSA_WITH_RC4_128_MD5            CipherSuite = [2]uint8{0x00, 0x04}
-	TLS_RSA_WITH_RC4_128_SHA            CipherSuite = [2]uint8{0x00, 0x05}
-	TLS_RSA_WITH_3DES_EDE_CBC_SHA       CipherSuite = [2]uint8{0x00, 0x0A}
-	TLS_RSA_WITH_AES_128_CBC_SHA        CipherSuite = [2]uint8{0x00, 0x2F}
-	TLS_RSA_WITH_AES_256_CBC_SHA        CipherSuite = [2]uint8{0x00, 0x35}
-	TLS_RSA_WITH_AES_128_CBC_SHA256     CipherSuite = [2]uint8{0x00, 0x3C}
-	TLS_RSA_WITH_AES_256_CBC_SHA256     CipherSuite = [2]uint8{0x00, 0x3D}
-	TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA    CipherSuite = [2]uint8{0x00, 0x0D}
-	TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA    CipherSuite = [2]uint8{0x00, 0x10}
-	TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA   CipherSuite = [2]uint8{0x00, 0x13}
-	TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA   CipherSuite = [2]uint8{0x00, 0x16}
-	TLS_DH_DSS_WITH_AES_128_CBC_SHA     CipherSuite = [2]uint8{0x00, 0x30}
-	TLS_DH_RSA_WITH_AES_128_CBC_SHA     CipherSuite = [2]uint8{0x00, 0x31}
-	TLS_DHE_DSS_WITH_AES_128_CBC_SHA    CipherSuite = [2]uint8{0x00, 0x32}
-	TLS_DHE_RSA_WITH_AES_128_CBC_SHA    CipherSuite = [2]uint8{0x00, 0x33}
-	TLS_DH_DSS_WITH_AES_256_CBC_SHA     CipherSuite = [2]uint8{0x00, 0x36}
-	TLS_DH_RSA_WITH_AES_256_CBC_SHA     CipherSuite = [2]uint8{0x00, 0x37}
-	TLS_DHE_DSS_WITH_AES_256_CBC_SHA    CipherSuite = [2]uint8{0x00, 0x38}
-	TLS_DHE_RSA_WITH_AES_256_CBC_SHA    CipherSuite = [2]uint8{0x00, 0x39}
-	TLS_DH_DSS_WITH_AES_128_CBC_SHA256  CipherSuite = [2]uint8{0x00, 0x3E}
-	TLS_DH_RSA_WITH_AES_128_CBC_SHA256  CipherSuite = [2]uint8{0x00, 0x3F}
-	TLS_DHE_DSS_WITH_AES_128_CBC_SHA256 CipherSuite = [2]uint8{0x00, 0x40}
-	TLS_DHE_RSA_WITH_AES_128_CBC_SHA256 CipherSuite = [2]uint8{0x00, 0x67}
-	TLS_DH_DSS_WITH_AES_256_CBC_SHA256  CipherSuite = [2]uint8{0x00, 0x68}
-	TLS_DH_RSA_WITH_AES_256_CBC_SHA256  CipherSuite = [2]uint8{0x00, 0x69}
-	TLS_DHE_DSS_WITH_AES_256_CBC_SHA256 CipherSuite = [2]uint8{0x00, 0x6A}
-	TLS_DHE_RSA_WITH_AES_256_CBC_SHA256 CipherSuite = [2]uint8{0x00, 0x6B}
-	TLS_DH_anon_WITH_RC4_128_MD5        CipherSuite = [2]uint8{0x00, 0x18}
-	TLS_DH_anon_WITH_3DES_EDE_CBC_SHA   CipherSuite = [2]uint8{0x00, 0x1B}
-	TLS_DH_anon_WITH_AES_128_CBC_SHA    CipherSuite = [2]uint8{0x00, 0x34}
-	TLS_DH_anon_WITH_AES_256_CBC_SHA    CipherSuite = [2]uint8{0x00, 0x3A}
-	TLS_DH_anon_WITH_AES_128_CBC_SHA256 CipherSuite = [2]uint8{0x00, 0x6C}
-	TLS_DH_anon_WITH_AES_256_CBC_SHA256 CipherSuite = [2]uint8{0x00, 0x6D}
-)
 
 type ClientHello struct {
 	ClientVersion      ProtocolVersion
@@ -179,6 +139,44 @@ func serializeClientHello(clientHello ClientHello) ([]byte, error) {
 }
 
 func main() {
+	// TLS_NULL_WITH_NULL_NULL := [2]uint8{0x00, 0x00}
+	TLS_RSA_WITH_NULL_MD5 := [2]uint8{0x00, 0x01}
+	// TLS_RSA_WITH_NULL_SHA := [2]uint8{0x00, 0x02}
+	// TLS_RSA_WITH_NULL_SHA256 := [2]uint8{0x00, 0x3B}
+	// TLS_RSA_WITH_RC4_128_MD5 := [2]uint8{0x00, 0x04}
+	TLS_RSA_WITH_RC4_128_SHA := [2]uint8{0x00, 0x05}
+	// TLS_RSA_WITH_3DES_EDE_CBC_SHA := [2]uint8{0x00, 0x0A}
+	// TLS_RSA_WITH_AES_128_CBC_SHA := [2]uint8{0x00, 0x2F}
+	// TLS_RSA_WITH_AES_256_CBC_SHA := [2]uint8{0x00, 0x35}
+	// TLS_RSA_WITH_AES_128_CBC_SHA256 := [2]uint8{0x00, 0x3C}
+	// TLS_RSA_WITH_AES_256_CBC_SHA256 := [2]uint8{0x00, 0x3D}
+	// TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA := [2]uint8{0x00, 0x0D}
+	// TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA := [2]uint8{0x00, 0x10}
+	// TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA := [2]uint8{0x00, 0x13}
+	// TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA := [2]uint8{0x00, 0x16}
+	// TLS_DH_DSS_WITH_AES_128_CBC_SHA := [2]uint8{0x00, 0x30}
+	// TLS_DH_RSA_WITH_AES_128_CBC_SHA := [2]uint8{0x00, 0x31}
+	// TLS_DHE_DSS_WITH_AES_128_CBC_SHA := [2]uint8{0x00, 0x32}
+	// TLS_DHE_RSA_WITH_AES_128_CBC_SHA := [2]uint8{0x00, 0x33}
+	// TLS_DH_DSS_WITH_AES_256_CBC_SHA := [2]uint8{0x00, 0x36}
+	// TLS_DH_RSA_WITH_AES_256_CBC_SHA := [2]uint8{0x00, 0x37}
+	// TLS_DHE_DSS_WITH_AES_256_CBC_SHA := [2]uint8{0x00, 0x38}
+	// TLS_DHE_RSA_WITH_AES_256_CBC_SHA := [2]uint8{0x00, 0x39}
+	// TLS_DH_DSS_WITH_AES_128_CBC_SHA256 := [2]uint8{0x00, 0x3E}
+	// TLS_DH_RSA_WITH_AES_128_CBC_SHA256 := [2]uint8{0x00, 0x3F}
+	// TLS_DHE_DSS_WITH_AES_128_CBC_SHA256 := [2]uint8{0x00, 0x40}
+	// TLS_DHE_RSA_WITH_AES_128_CBC_SHA256 := [2]uint8{0x00, 0x67}
+	// TLS_DH_DSS_WITH_AES_256_CBC_SHA256 := [2]uint8{0x00, 0x68}
+	// TLS_DH_RSA_WITH_AES_256_CBC_SHA256 := [2]uint8{0x00, 0x69}
+	// TLS_DHE_DSS_WITH_AES_256_CBC_SHA256 := [2]uint8{0x00, 0x6A}
+	// TLS_DHE_RSA_WITH_AES_256_CBC_SHA256 := [2]uint8{0x00, 0x6B}
+	// TLS_DH_anon_WITH_RC4_128_MD5 := [2]uint8{0x00, 0x18}
+	// TLS_DH_anon_WITH_3DES_EDE_CBC_SHA := [2]uint8{0x00, 0x1B}
+	// TLS_DH_anon_WITH_AES_128_CBC_SHA := [2]uint8{0x00, 0x34}
+	// TLS_DH_anon_WITH_AES_256_CBC_SHA := [2]uint8{0x00, 0x3A}
+	// TLS_DH_anon_WITH_AES_128_CBC_SHA256 := [2]uint8{0x00, 0x6C}
+	// TLS_DH_anon_WITH_AES_256_CBC_SHA256 := [2]uint8{0x00, 0x6D}
+
 	log.Println("Started")
 	// timestamp
 	dt := time.Now()
@@ -197,14 +195,16 @@ func main() {
 
 	// ペイロードの組み立て
 	log.Println("Create payload ...")
+	var arr [28]byte
+	copy(arr[:], "abcdefghijklmnopqrstuvwxyz12")
 	ch := ClientHello{
 		ClientVersion: ProtocolVersion{
 			Major: 3,
 			Minor: 3,
 		},
 		Random: Random{
-			GmtUnixTime: unix,
-			RandomBytes: []byte("abcdefghijklmnopqrstuvwxyz12"),
+			GmtUnixTime: uint32(unix),
+			RandomBytes: arr,
 		},
 		SessionId:          SessionId{0, 0, 0, 0, 0, 0, 0, 0},
 		CipherSuites:       []CipherSuite{TLS_RSA_WITH_NULL_MD5, TLS_RSA_WITH_RC4_128_SHA},
@@ -212,8 +212,8 @@ func main() {
 		Extensions:         0,
 	}
 	hp := HandshakeProtocol{
-		MsgType: HelloRequest,
-		Length:  uint32(len(clientHello.CipherSuites) + len(clientHello.SessionId) + 39), // Adjust the length based on the actual structure
+		MsgType: helloRequest,
+		Length:  uint32(len(ch.CipherSuites) + len(ch.SessionId) + 39), // Adjust the length based on the actual structure
 		Body:    ch,
 	}
 	serializedData, err := serializeHandshakeProtocol(hp)
