@@ -1,7 +1,12 @@
 package main
 
 import (
+	"bytes"
+	"encoding/binary"
+	"encoding/hex"
+	"fmt"
 	"log"
+	"net"
 	"time"
 )
 
@@ -89,39 +94,153 @@ type HandshakeProtocol struct {
 	Body    ClientHello
 }
 
-func main() {
-	log.Println(Finished)
+func serializeHandshakeProtocol(handshake HandshakeProtocol) ([]byte, error) {
+	// Buffer to hold the serialized data
+	buffer := new(bytes.Buffer)
 
+	// Write MsgType to the buffer
+	err := binary.Write(buffer, binary.BigEndian, handshake.MsgType)
+	if err != nil {
+		return nil, err
+	}
+
+	// Write Length to the buffer as uint24 (3 bytes)
+	err = binary.Write(buffer, binary.BigEndian, uint8((handshake.Length>>16)&0xFF))
+	if err != nil {
+		return nil, err
+	}
+	err = binary.Write(buffer, binary.BigEndian, uint8((handshake.Length>>8)&0xFF))
+	if err != nil {
+		return nil, err
+	}
+	err = binary.Write(buffer, binary.BigEndian, uint8(handshake.Length&0xFF))
+	if err != nil {
+		return nil, err
+	}
+
+	// Serialize the ClientHello struct into the buffer
+	clientHelloBytes, err := serializeClientHello(handshake.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	// Write the serialized ClientHello to the buffer
+	_, err = buffer.Write(clientHelloBytes)
+	if err != nil {
+		return nil, err
+	}
+
+	return buffer.Bytes(), nil
+}
+
+func serializeClientHello(clientHello ClientHello) ([]byte, error) {
+	// Buffer to hold the serialized data
+	buffer := new(bytes.Buffer)
+
+	// Serialize each field of the ClientHello struct into the buffer
+
+	err := binary.Write(buffer, binary.BigEndian, clientHello.ClientVersion)
+	if err != nil {
+		return nil, err
+	}
+
+	err = binary.Write(buffer, binary.BigEndian, clientHello.Random)
+	if err != nil {
+		return nil, err
+	}
+
+	// Serialize SessionId
+	_, err = buffer.Write(clientHello.SessionId[:])
+	if err != nil {
+		return nil, err
+	}
+
+	// Serialize CipherSuites
+	for _, suite := range clientHello.CipherSuites {
+		err = binary.Write(buffer, binary.BigEndian, suite)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// Serialize CompressionMethods
+	err = binary.Write(buffer, binary.BigEndian, clientHello.CompressionMethods)
+	if err != nil {
+		return nil, err
+	}
+
+	// Serialize Extensions
+	err = binary.Write(buffer, binary.BigEndian, clientHello.Extensions)
+	if err != nil {
+		return nil, err
+	}
+
+	return buffer.Bytes(), nil
+}
+
+func main() {
+	log.Println("Started")
 	// timestamp
 	dt := time.Now()
 	log.Println(dt)
 	unix := dt.Unix()
 	log.Println(unix)
 
-	h := HandshakeProtocol{
-		MsgType: ClientHello,
-		Length:  1,
-		Body: ClientHello{
-			ClientVersion: ProtocolVersion{
-				Major: 3,
-				Minor: 3,
-			},
-			Random: Random{
-				GmtUnixTime: unix,
-				RandomBytes: []byte("abcdefghijklmnopqrstuvwxyz12"),
-			},
-			SessionId:          []byte(""),
-			CipherSuites:       []CipherSuites{TLS_RSA_WITH_RC4_128_MD5},
-			CompressionMethods: 0,
-			Extensions:         0,
-		},
+	// サーバーに接続
+	log.Println("Connecting ...")
+	conn, err := net.Dial("tcp", "1.1.1.1:443")
+	if err != nil {
+		fmt.Println("Error connecting to the server:", err)
+		return
 	}
-	// log.Println("Connecting ...")
-	// // サーバーに接続
-	// conn, err := net.Dial("tcp", "1.1.1.1:443")
-	// if err != nil {
-	// 	fmt.Println("Error connecting to the server:", err)
-	// 	return
-	// }
-	// defer conn.Close()
+	defer conn.Close()
+
+	// ペイロードの組み立て
+	log.Println("Create payload ...")
+	ch := ClientHello{
+		ClientVersion: ProtocolVersion{
+			Major: 3,
+			Minor: 3,
+		},
+		Random: Random{
+			GmtUnixTime: unix,
+			RandomBytes: []byte("abcdefghijklmnopqrstuvwxyz12"),
+		},
+		SessionId:          SessionId{0, 0, 0, 0, 0, 0, 0, 0},
+		CipherSuites:       []CipherSuite{TLS_RSA_WITH_NULL_MD5, TLS_RSA_WITH_RC4_128_SHA},
+		CompressionMethods: 0,
+		Extensions:         0,
+	}
+	hp := HandshakeProtocol{
+		MsgType: HelloRequest,
+		Length:  uint32(len(clientHello.CipherSuites) + len(clientHello.SessionId) + 39), // Adjust the length based on the actual structure
+		Body:    ch,
+	}
+	serializedData, err := serializeHandshakeProtocol(hp)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	// Debug
+	payloadByteHex := hex.EncodeToString(serializedData)
+	log.Printf("payloadByte: %s", payloadByteHex)
+
+	// サーバーにメッセージを送信
+	log.Println("Sending ...")
+	_, err = conn.Write(serializedData)
+	if err != nil {
+		fmt.Println("Error sending message to the server:", err)
+		return
+	}
+
+	// サーバーからの応答を受信
+	log.Println("Receiving ...")
+	buffer := make([]byte, 1024)
+	count, err := conn.Read(buffer)
+	if err != nil {
+		fmt.Println("Error reading server response:", err)
+		return
+	}
+
+	fmt.Println("Server response:", string(buffer[:count]))
 }
