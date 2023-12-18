@@ -43,7 +43,7 @@ type ClientHello struct {
 	ClientVersion      ProtocolVersion
 	Random             Random
 	SessionId          SessionId
-	CipherSuites       []CipherSuite
+	CipherSuites       []CipherSuite // 65534 bytes
 	CompressionMethods uint8
 	Extensions         uint16
 }
@@ -225,22 +225,22 @@ func main() {
 	payloadByteHex := hex.EncodeToString(serializedData)
 	log.Printf("payloadByte: %s", payloadByteHex)
 
-	// サーバーにメッセージを送信
-	log.Println("Sending ...")
-	_, err = conn.Write(serializedData)
-	if err != nil {
-		fmt.Println("Error sending message to the server:", err)
-		return
-	}
+	// // サーバーにメッセージを送信
+	// log.Println("Sending ...")
+	// _, err = conn.Write(serializedData)
+	// if err != nil {
+	// 	fmt.Println("Error sending message to the server:", err)
+	// 	return
+	// }
 
-	// サーバーからの応答を受信
-	log.Println("Receiving ...")
-	buffer := make([]byte, 1024)
-	count, err := conn.Read(buffer)
-	if err != nil {
-		fmt.Println("Error reading server response:", err)
-		return
-	}
+	// // サーバーからの応答を受信
+	// log.Println("Receiving ...")
+	// buffer := make([]byte, 1024)
+	// count, err := conn.Read(buffer)
+	// if err != nil {
+	// 	fmt.Println("Error reading server response:", err)
+	// 	return
+	// }
 
-	fmt.Println("Server response:", string(buffer[:count]))
+	// fmt.Println("Server response:", string(buffer[:count]))
 }
